@@ -2,6 +2,8 @@
 
 A comprehensive, interactive study guide for the **Advanced Professional WordPress Developer** certification exam. This Next.js application provides detailed tutorials covering all 8 exam sections with progress tracking, markdown content rendering, and a modern, responsive interface.
 
+🌐 **Live Demo**: [https://gavande1.github.io/learn-wp/](https://gavande1.github.io/learn-wp/)
+
 ## 🎯 Features
 
 - **8 Comprehensive Exam Sections** covering all certification topics
@@ -212,6 +214,8 @@ Progress is stored in browser localStorage with the key `wordpress-cert-progress
 ```
 
 ## 🚢 Deployment
+
+**Live Application**: The application is deployed and available at [https://gavande1.github.io/learn-wp/](https://gavande1.github.io/learn-wp/)
 
 ### Vercel (Recommended)
 
