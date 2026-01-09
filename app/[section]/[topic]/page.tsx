@@ -82,8 +82,11 @@ export default function TopicPage() {
 	const [isLoadingContent, setIsLoadingContent] = useState(false);
 	const [isPending, startTransition] = useTransition();
 
-	// Load topic data and content
-	const loadTopicData = useCallback(async (secId: string, topId: string) => {
+	// Effect to load data when params change
+	useEffect(() => {
+		const secId = sectionId;
+		const topId = topicId;
+		
 		const sectionData = getSectionById(secId);
 		const topicData = getTopicByIds(secId, topId);
 		
@@ -134,12 +137,7 @@ export default function TopicPage() {
 			setInitialLoading(false);
 			setIsLoadingContent(false);
 		});
-	}, []);
-
-	// Effect to load data when params change
-	useEffect(() => {
-		loadTopicData(sectionId, topicId);
-	}, [sectionId, topicId, loadTopicData]);
+	}, [sectionId, topicId]);
 
 	const handleToggleComplete = () => {
 		const newStatus = toggleTopicComplete(sectionId, topicId);
