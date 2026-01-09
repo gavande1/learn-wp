@@ -10,10 +10,14 @@ import { getSectionProgress } from "@/lib/progress";
 import { Section, SectionProgress } from "@/types/exam";
 import { ArrowLeft, BookOpen, Target } from "lucide-react";
 
-export default function SectionClient({ sectionId }: { sectionId: string }) {
+export default function SectionClient() {
+	// Read params from URL using useParams hook (works with static export)
+	const params = useParams();
+	const sectionId = (params?.section as string) || "";
+	
 	// Initialize data synchronously to avoid loading state
-	const sectionData = getSectionById(sectionId) || null;
-	const sectionProgress = getSectionProgress(sectionId);
+	const sectionData = sectionId ? (getSectionById(sectionId) || null) : null;
+	const sectionProgress = sectionId ? getSectionProgress(sectionId) : { completed: 0, total: 0, percentage: 0 };
 	
 	const [section, setSection] = useState<Section | null>(sectionData);
 	const [progress, setProgress] = useState<SectionProgress>(sectionProgress);

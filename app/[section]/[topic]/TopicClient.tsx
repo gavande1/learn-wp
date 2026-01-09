@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
@@ -66,24 +67,26 @@ function ContentSkeleton() {
 	);
 }
 
-export default function TopicClient({ sectionId, topicId }: { sectionId: string; topicId: string }) {
+export default function TopicClient() {
+	// Read params from URL using useParams hook (works with static export)
+	const params = useParams();
+	const sectionId = (params?.section as string) || "";
+	const topicId = (params?.topic as string) || "";
+	
 	// Initialize metadata synchronously to avoid loading state
-	// Handle case where sectionId or topicId might be undefined initially
-	const validSectionId = sectionId || "";
-	const validTopicId = topicId || "";
-	const sectionData = validSectionId ? (getSectionById(validSectionId) || null) : null;
-	const topicData = validSectionId && validTopicId ? (getTopicByIds(validSectionId, validTopicId) || null) : null;
-	const cachedContent = validSectionId && validTopicId ? getCachedContent(validSectionId, validTopicId) : "";
+	const sectionData = sectionId ? (getSectionById(sectionId) || null) : null;
+	const topicData = sectionId && topicId ? (getTopicByIds(sectionId, topicId) || null) : null;
+	const cachedContent = sectionId && topicId ? getCachedContent(sectionId, topicId) : "";
 	
 	const [section, setSection] = useState<Section | null>(sectionData);
 	const [topic, setTopic] = useState<TopicMeta | null>(topicData);
 	const [content, setContent] = useState<string>(cachedContent || "");
-	const [isComplete, setIsComplete] = useState(() => validSectionId && validTopicId ? isTopicComplete(validSectionId, validTopicId) : false);
+	const [isComplete, setIsComplete] = useState(() => sectionId && topicId ? isTopicComplete(sectionId, topicId) : false);
 	const [nextTopicInfo, setNextTopicInfo] = useState<{ sectionId: string; topicId: string } | null>(() => 
-		sectionData && topicData ? getNextTopic(validSectionId, validTopicId) : null
+		sectionData && topicData ? getNextTopic(sectionId, topicId) : null
 	);
 	const [prevTopicInfo, setPrevTopicInfo] = useState<{ sectionId: string; topicId: string } | null>(() => 
-		sectionData && topicData ? getPrevTopic(validSectionId, validTopicId) : null
+		sectionData && topicData ? getPrevTopic(sectionId, topicId) : null
 	);
 	const [initialLoading, setInitialLoading] = useState(!cachedContent);
 	const [isLoadingContent, setIsLoadingContent] = useState(false);
@@ -176,6 +179,7 @@ export default function TopicClient({ sectionId, topicId }: { sectionId: string;
 	}, [sectionId, topicId]);
 
 	const handleToggleComplete = () => {
+		if (!sectionId || !topicId) return;
 		const newStatus = toggleTopicComplete(sectionId, topicId);
 		setIsComplete(newStatus);
 	};

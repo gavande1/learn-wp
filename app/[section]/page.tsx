@@ -8,5 +8,6 @@ export function generateStaticParams() {
 }
 
 export default function SectionPage({ params }: { params: { section: string } }) {
-	return <SectionClient sectionId={params.section} />;
+	// Params should be available, but if not, SectionClient will read from URL
+	return <SectionClient />;
 }
