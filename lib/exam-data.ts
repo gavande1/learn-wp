@@ -130,6 +130,10 @@ export const examData: ExamData = {
 	],
 };
 
+export function getAllSections(): Section[] {
+	return examData.sections;
+}
+
 export function getSectionById(sectionId: string): Section | undefined {
 	return examData.sections.find((s) => s.id === sectionId);
 }
