@@ -67,13 +67,22 @@ function ContentSkeleton() {
 }
 
 export default function TopicClient({ sectionId, topicId }: { sectionId: string; topicId: string }) {
-	const [section, setSection] = useState<Section | null>(null);
-	const [topic, setTopic] = useState<TopicMeta | null>(null);
-	const [content, setContent] = useState<string>("");
-	const [isComplete, setIsComplete] = useState(false);
-	const [nextTopicInfo, setNextTopicInfo] = useState<{ sectionId: string; topicId: string } | null>(null);
-	const [prevTopicInfo, setPrevTopicInfo] = useState<{ sectionId: string; topicId: string } | null>(null);
-	const [initialLoading, setInitialLoading] = useState(true);
+	// Initialize metadata synchronously to avoid loading state
+	const sectionData = getSectionById(sectionId) || null;
+	const topicData = getTopicByIds(sectionId, topicId) || null;
+	const cachedContent = getCachedContent(sectionId, topicId);
+	
+	const [section, setSection] = useState<Section | null>(sectionData);
+	const [topic, setTopic] = useState<TopicMeta | null>(topicData);
+	const [content, setContent] = useState<string>(cachedContent || "");
+	const [isComplete, setIsComplete] = useState(() => isTopicComplete(sectionId, topicId));
+	const [nextTopicInfo, setNextTopicInfo] = useState<{ sectionId: string; topicId: string } | null>(() => 
+		sectionData && topicData ? getNextTopic(sectionId, topicId) : null
+	);
+	const [prevTopicInfo, setPrevTopicInfo] = useState<{ sectionId: string; topicId: string } | null>(() => 
+		sectionData && topicData ? getPrevTopic(sectionId, topicId) : null
+	);
+	const [initialLoading, setInitialLoading] = useState(!cachedContent);
 	const [isLoadingContent, setIsLoadingContent] = useState(false);
 	const [isPending, startTransition] = useTransition();
 
@@ -82,10 +91,10 @@ export default function TopicClient({ sectionId, topicId }: { sectionId: string;
 		const secId = sectionId;
 		const topId = topicId;
 		
-		const sectionData = getSectionById(secId);
-		const topicData = getTopicByIds(secId, topId);
+		const newSectionData = getSectionById(secId);
+		const newTopicData = getTopicByIds(secId, topId);
 		
-		if (!sectionData || !topicData) {
+		if (!newSectionData || !newTopicData) {
 			setSection(null);
 			setTopic(null);
 			setInitialLoading(false);
@@ -94,8 +103,8 @@ export default function TopicClient({ sectionId, topicId }: { sectionId: string;
 		}
 
 		// Update metadata immediately (no async needed)
-		setSection(sectionData);
-		setTopic(topicData);
+		setSection(newSectionData);
+		setTopic(newTopicData);
 		setIsComplete(isTopicComplete(secId, topId));
 		
 		const next = getNextTopic(secId, topId);
@@ -114,9 +123,9 @@ export default function TopicClient({ sectionId, topicId }: { sectionId: string;
 		}
 
 		// Check cache first for instant display
-		const cachedContent = getCachedContent(secId, topId);
-		if (cachedContent) {
-			setContent(cachedContent);
+		const newCachedContent = getCachedContent(secId, topId);
+		if (newCachedContent) {
+			setContent(newCachedContent);
 			setInitialLoading(false);
 			setIsLoadingContent(false);
 			return;
@@ -127,7 +136,7 @@ export default function TopicClient({ sectionId, topicId }: { sectionId: string;
 
 		// Fetch content with transition
 		startTransition(async () => {
-			const newContent = await fetchContent(secId, topId, topicData.title);
+			const newContent = await fetchContent(secId, topId, newTopicData.title);
 			setContent(newContent);
 			setInitialLoading(false);
 			setIsLoadingContent(false);

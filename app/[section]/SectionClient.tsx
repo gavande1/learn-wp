@@ -11,13 +11,18 @@ import { Section, SectionProgress } from "@/types/exam";
 import { ArrowLeft, BookOpen, Target } from "lucide-react";
 
 export default function SectionClient({ sectionId }: { sectionId: string }) {
-	const [section, setSection] = useState<Section | null>(null);
-	const [progress, setProgress] = useState<SectionProgress>({ completed: 0, total: 0, percentage: 0 });
+	// Initialize data synchronously to avoid loading state
+	const sectionData = getSectionById(sectionId) || null;
+	const sectionProgress = getSectionProgress(sectionId);
+	
+	const [section, setSection] = useState<Section | null>(sectionData);
+	const [progress, setProgress] = useState<SectionProgress>(sectionProgress);
 
 	useEffect(() => {
-		const sectionData = getSectionById(sectionId);
-		if (sectionData) {
-			setSection(sectionData);
+		// Update if sectionId changes
+		const newSectionData = getSectionById(sectionId);
+		if (newSectionData) {
+			setSection(newSectionData);
 			setProgress(getSectionProgress(sectionId));
 		}
 	}, [sectionId]);
