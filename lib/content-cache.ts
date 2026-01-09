@@ -29,14 +29,36 @@ export async function fetchContent(sectionId: string, topicId: string, fallbackT
 	// Create new fetch request
 	const request = (async () => {
 		try {
-			const response = await fetch(`/content/${sectionId}/${topicId}.md`);
+			// Detect basePath from current location (for GitHub Pages compatibility)
+			// If pathname starts with /learn-wp, use that as basePath
+			let basePath = '';
+			if (typeof window !== 'undefined') {
+				const pathname = window.location.pathname;
+				// Extract basePath: if pathname is /learn-wp/..., basePath is /learn-wp
+				// Otherwise, it's empty (for local development)
+				const pathParts = pathname.split('/').filter(Boolean);
+				if (pathParts[0] === 'learn-wp') {
+					basePath = '/learn-wp';
+				}
+			}
+			
+			const contentPath = `${basePath}/content/${sectionId}/${topicId}.md`;
+			const response = await fetch(contentPath);
 			if (response.ok) {
 				const text = await response.text();
 				contentCache.set(key, text);
 				return text;
+			} else {
+				// Log for debugging (only in development)
+				if (process.env.NODE_ENV === 'development') {
+					console.warn(`Failed to fetch content from ${contentPath}: ${response.status}`);
+				}
 			}
-		} catch {
-			// Silently fail, return fallback
+		} catch (error) {
+			// Log for debugging (only in development)
+			if (process.env.NODE_ENV === 'development') {
+				console.error('Error fetching content:', error);
+			}
 		}
 		
 		const fallback = `# ${fallbackTitle || 'Topic'}\n\nContent coming soon...`;
