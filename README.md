@@ -27,7 +27,8 @@ A comprehensive, interactive study guide for the **Advanced Professional WordPre
 
 ## 🛠️ Tech Stack
 
-- **Framework**: [Next.js 14](https://nextjs.org/) with App Router
+- **Framework**: [Next.js 16](https://nextjs.org/) with App Router and Turbopack
+- **React**: React 19.2+
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Content**: Markdown files with [react-markdown](https://github.com/remarkjs/react-markdown)
@@ -84,8 +85,10 @@ A comprehensive, interactive study guide for the **Advanced Professional WordPre
 
 ### Prerequisites
 
-- Node.js 18+ and npm (or yarn/pnpm)
+- Node.js 20.9.0+ and npm (or yarn/pnpm)
 - Git
+
+> **Note**: This project uses Next.js 16 with React 19, which requires Node.js 20.9.0 or later. Make sure you have the correct Node.js version installed.
 
 ### Installation
 
@@ -177,17 +180,24 @@ The project uses Tailwind CSS. Modify `tailwind.config.ts` to customize the desi
 
 ### Available Scripts
 
-- `npm run dev` - Start development server
+- `npm run dev` - Start development server with Turbopack (Next.js 16 default)
 - `npm run build` - Build for production
 - `npm start` - Start production server
-- `npm run lint` - Run ESLint
+- `npm run lint` - Run ESLint (v9+)
+
+### Recent Updates
+
+- **Next.js 16**: Upgraded to the latest version with Turbopack as the default bundler
+- **React 19**: Upgraded to React 19.2+ for improved performance and new features
+- **ESLint 9**: Updated to ESLint 9 for better compatibility with Next.js 16
 
 ### Code Style
 
 - Use TypeScript for type safety
 - Follow Next.js App Router conventions
-- Use 4 spaces for indentation (not tabs)
+- Use 4 tabs for indentation (not spaces)
 - Follow existing code patterns and practices
+- React 19 features: Uses `useTransition` for smooth content loading
 
 ## 📊 Progress Tracking
 
