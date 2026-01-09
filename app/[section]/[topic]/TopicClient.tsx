@@ -68,19 +68,22 @@ function ContentSkeleton() {
 
 export default function TopicClient({ sectionId, topicId }: { sectionId: string; topicId: string }) {
 	// Initialize metadata synchronously to avoid loading state
-	const sectionData = getSectionById(sectionId) || null;
-	const topicData = getTopicByIds(sectionId, topicId) || null;
-	const cachedContent = getCachedContent(sectionId, topicId);
+	// Handle case where sectionId or topicId might be undefined initially
+	const validSectionId = sectionId || "";
+	const validTopicId = topicId || "";
+	const sectionData = validSectionId ? (getSectionById(validSectionId) || null) : null;
+	const topicData = validSectionId && validTopicId ? (getTopicByIds(validSectionId, validTopicId) || null) : null;
+	const cachedContent = validSectionId && validTopicId ? getCachedContent(validSectionId, validTopicId) : "";
 	
 	const [section, setSection] = useState<Section | null>(sectionData);
 	const [topic, setTopic] = useState<TopicMeta | null>(topicData);
 	const [content, setContent] = useState<string>(cachedContent || "");
-	const [isComplete, setIsComplete] = useState(() => isTopicComplete(sectionId, topicId));
+	const [isComplete, setIsComplete] = useState(() => validSectionId && validTopicId ? isTopicComplete(validSectionId, validTopicId) : false);
 	const [nextTopicInfo, setNextTopicInfo] = useState<{ sectionId: string; topicId: string } | null>(() => 
-		sectionData && topicData ? getNextTopic(sectionId, topicId) : null
+		sectionData && topicData ? getNextTopic(validSectionId, validTopicId) : null
 	);
 	const [prevTopicInfo, setPrevTopicInfo] = useState<{ sectionId: string; topicId: string } | null>(() => 
-		sectionData && topicData ? getPrevTopic(sectionId, topicId) : null
+		sectionData && topicData ? getPrevTopic(validSectionId, validTopicId) : null
 	);
 	const [initialLoading, setInitialLoading] = useState(!cachedContent);
 	const [isLoadingContent, setIsLoadingContent] = useState(false);
@@ -88,8 +91,37 @@ export default function TopicClient({ sectionId, topicId }: { sectionId: string;
 
 	// Effect to load data when params change
 	useEffect(() => {
-		const secId = sectionId;
-		const topId = topicId;
+		const secId = sectionId || "";
+		const topId = topicId || "";
+		
+		if (!secId || !topId) {
+			return;
+		}
+		
+		// Only update if params have changed or data is missing
+		const currentSectionId = section?.id;
+		const currentTopicId = topic?.id;
+		
+		if (currentSectionId === secId && currentTopicId === topId && content) {
+			// Data already loaded and matches, just ensure content is loaded
+			if (!content) {
+				const newCachedContent = getCachedContent(secId, topId);
+				if (newCachedContent) {
+					setContent(newCachedContent);
+					setInitialLoading(false);
+					setIsLoadingContent(false);
+				} else if (topic) {
+					setIsLoadingContent(true);
+					startTransition(async () => {
+						const newContent = await fetchContent(secId, topId, topic.title);
+						setContent(newContent);
+						setInitialLoading(false);
+						setIsLoadingContent(false);
+					});
+				}
+			}
+			return;
+		}
 		
 		const newSectionData = getSectionById(secId);
 		const newTopicData = getTopicByIds(secId, topId);
